@@ -1,65 +1,96 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { BlobBackground } from '@/components/ui/BlobBackground';
+
+export default function JoinPage() {
+  const router = useRouter();
+  const [username, setUsername] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // If already joined this session, skip straight to play.
+  useEffect(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('player_id')) {
+      router.replace('/play');
+    }
+  }, [router]);
+
+  async function join(e: React.FormEvent) {
+    e.preventDefault();
+    const name = username.trim();
+    if (!name) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: name }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? 'Could not join');
+        setLoading(false);
+        return;
+      }
+      localStorage.setItem('player_id', data.player.id);
+      localStorage.setItem('username', data.player.username);
+      localStorage.setItem('session_id', data.session_id);
+      router.push('/play');
+    } catch {
+      setError('Network error — try again');
+      setLoading(false);
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="flex min-h-dvh flex-col items-center justify-center p-6">
+      <BlobBackground />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md rounded-card bg-white p-8 shadow-lg"
+      >
+        <div className="mb-6 text-center">
+          <h1 className="text-3xl font-extrabold text-navy">Internal Selection</h1>
+          <p className="mt-1 font-medium text-teal">Play along. Learn along.</p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        <form onSubmit={join} className="flex flex-col gap-4">
+          <label className="flex flex-col gap-2">
+            <span className="font-semibold text-navy">What&apos;s your name?</span>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              maxLength={24}
+              autoFocus
+              placeholder="e.g. RecruitGuru"
+              className="rounded-btn border-2 border-navy/15 bg-bg px-4 py-3 text-lg text-navy outline-none focus:border-teal"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </label>
+
+          {error && <p className="text-sm font-medium text-error">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={loading || !username.trim()}
+            className="rounded-btn bg-teal px-6 py-4 text-lg font-bold text-white transition-colors hover:bg-teal/90 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            {loading ? 'Joining…' : 'Join Game 🎉'}
+          </button>
+        </form>
+      </motion.div>
+
+      <a
+        href="/host"
+        className="mt-6 text-sm font-medium text-navy/50 underline-offset-2 hover:underline"
+      >
+        I&apos;m the presenter →
+      </a>
+    </main>
   );
 }
