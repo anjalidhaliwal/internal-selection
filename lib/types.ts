@@ -1,11 +1,16 @@
 // ── Domain types ────────────────────────────────────────────────
 
 export type SlideType =
-  | 'lecture'
-  | 'question'
-  | 'discussion'
-  | 'checkpoint'
-  | 'break';
+  | 'lobby' // intro / welcome — shows QR + roster
+  | 'title' // section title / transition — "eyes up front"
+  | 'question' // interactive question for players
+  | 'reveal' // answer reveal — recaps the previous question's answer
+  | 'discussion' // discussion prompt, no input
+  | 'checkpoint' // leaderboard reveal
+  | 'break' // timed break
+  | 'wheel' // Wheel of Fortune — big final-ish leaderboard
+  | 'end' // final results + CSV
+  | 'lecture'; // generic display slide
 
 export type QuestionType =
   | 'multiple_choice'

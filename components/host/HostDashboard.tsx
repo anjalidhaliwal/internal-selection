@@ -3,17 +3,22 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGameSession } from '@/hooks/useGameSession';
-import { SLIDES, TOTAL_SLIDES, getSlide } from '@/lib/slides-data';
+import { SLIDES, TOTAL_SLIDES, FIRST_SLIDE, LAST_SLIDE, getSlide } from '@/lib/slides-data';
 import { LiveAnswerTracker } from './LiveAnswerTracker';
 import { LeaderboardPreview } from './LeaderboardPreview';
 import { QRJoinCode } from '@/components/ui/QRJoinCode';
 
 const TYPE_BADGE: Record<string, string> = {
-  lecture: 'bg-navy/10 text-navy',
+  lobby: 'bg-sage/20 text-sage',
+  title: 'bg-navy/10 text-navy',
   question: 'bg-teal/15 text-teal',
+  reveal: 'bg-tan/30 text-navy',
   discussion: 'bg-tan/25 text-navy',
   checkpoint: 'bg-sage/20 text-sage',
   break: 'bg-navy/10 text-navy',
+  wheel: 'bg-sage/20 text-sage',
+  end: 'bg-teal/15 text-teal',
+  lecture: 'bg-navy/10 text-navy',
 };
 
 export function HostDashboard({ sessionId }: { sessionId: string }) {
@@ -77,7 +82,7 @@ export function HostDashboard({ sessionId }: { sessionId: string }) {
     URL.revokeObjectURL(url);
   }
 
-  const index = session?.current_slide_index ?? 0;
+  const index = session?.current_slide_index ?? FIRST_SLIDE;
   const slide = getSlide(index);
   const nextSlide = getSlide(index + 1);
   const isQuestion = slide?.type === 'question';
@@ -112,7 +117,7 @@ export function HostDashboard({ sessionId }: { sessionId: string }) {
                 {slide?.type}
               </span>
               <span className="text-sm text-navy/50">
-                Slide {index} / {TOTAL_SLIDES - 1}
+                Slide {index} / {TOTAL_SLIDES}
               </span>
             </div>
             <h2 className="text-balance text-3xl font-extrabold text-navy">
@@ -130,14 +135,14 @@ export function HostDashboard({ sessionId }: { sessionId: string }) {
             <div className="mt-6 flex items-center gap-3">
               <button
                 onClick={() => advance({ direction: 'prev' })}
-                disabled={busy || index <= 0}
+                disabled={busy || index <= FIRST_SLIDE}
                 className="rounded-btn border-2 border-navy/15 px-5 py-3 font-semibold text-navy transition-colors hover:bg-navy/5 disabled:opacity-30"
               >
                 ← Back
               </button>
               <button
                 onClick={() => advance({ direction: 'next' })}
-                disabled={busy || index >= TOTAL_SLIDES - 1}
+                disabled={busy || index >= LAST_SLIDE}
                 className="flex-1 rounded-btn bg-teal px-5 py-4 text-lg font-bold text-white transition-colors hover:bg-teal/90 disabled:opacity-40"
               >
                 {nextSlide ? `Next: ${nextSlide.title} →` : 'Next →'}

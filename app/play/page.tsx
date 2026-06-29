@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameSession } from '@/hooks/useGameSession';
 import { usePlayers } from '@/hooks/usePlayers';
-import { getSlide, TOTAL_SLIDES } from '@/lib/slides-data';
+import { getSlide, TOTAL_SLIDES, FIRST_SLIDE } from '@/lib/slides-data';
 import { BlobBackground } from '@/components/ui/BlobBackground';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { ScoreDisplay } from '@/components/ui/ScoreDisplay';
 import { LobbyScreen } from '@/components/screens/LobbyScreen';
+import { TitleScreen } from '@/components/screens/TitleScreen';
+import { RevealScreen } from '@/components/screens/RevealScreen';
 import { DiscussionScreen } from '@/components/screens/DiscussionScreen';
 import { CheckpointScreen } from '@/components/screens/CheckpointScreen';
 import { WaitingScreen } from '@/components/screens/WaitingScreen';
@@ -50,37 +52,31 @@ export default function PlayPage() {
     );
   }
 
-  const index = session?.current_slide_index ?? 0;
-  const status = session?.status ?? 'lobby';
+  const rawIndex = session?.current_slide_index ?? FIRST_SLIDE;
+  const index = Math.min(TOTAL_SLIDES, Math.max(FIRST_SLIDE, rawIndex));
   const slide = getSlide(index);
 
-  const inLobby = status === 'lobby' || index === 0;
-  const ended = status === 'ended' || index >= TOTAL_SLIDES - 1;
-
   function renderSlide() {
-    if (inLobby) {
-      return (
-        <LobbyScreen sessionId={me!.sessionId} username={me!.username} appUrl={appUrl} />
-      );
-    }
-    if (ended) {
-      return <EndScreen sessionId={me!.sessionId} playerId={me!.id} />;
-    }
-    if (!slide) {
-      return <WaitingScreen />;
-    }
+    if (!slide) return <WaitingScreen />;
     switch (slide.type) {
+      case 'lobby':
+        return (
+          <LobbyScreen sessionId={me!.sessionId} username={me!.username} appUrl={appUrl} />
+        );
+      case 'title':
+        return <TitleScreen title={slide.title} />;
       case 'question':
         return slide.question_type ? (
           <QuestionWrapper slide={slide} playerId={me!.id} />
         ) : (
-          <WaitingScreen title={slide.title} />
+          <TitleScreen title={slide.title} />
         );
+      case 'reveal':
+        return <RevealScreen slideIndex={index} />;
       case 'discussion':
-        return (
-          <DiscussionScreen title={slide.title} prompt={slide.prompt ?? ''} />
-        );
+        return <DiscussionScreen title={slide.title} prompt={slide.prompt ?? ''} />;
       case 'checkpoint':
+      case 'wheel':
         return (
           <CheckpointScreen
             sessionId={me!.sessionId}
@@ -90,19 +86,13 @@ export default function PlayPage() {
         );
       case 'break':
         return (
-          <WaitingScreen
-            title={slide.title}
-            message="Take a breather — back soon! ☕"
-          />
+          <WaitingScreen title={slide.title} message="Take a breather — back soon! ☕" />
         );
+      case 'end':
+        return <EndScreen sessionId={me!.sessionId} playerId={me!.id} />;
       case 'lecture':
       default:
-        return (
-          <WaitingScreen
-            title={slide.title}
-            message="Eyes up front — the presenter is talking through this one."
-          />
-        );
+        return <TitleScreen title={slide.title} />;
     }
   }
 
@@ -113,7 +103,7 @@ export default function PlayPage() {
       {/* Top bar */}
       <div className="mb-6 flex items-center gap-4">
         <div className="flex-1">
-          <ProgressBar current={index} total={TOTAL_SLIDES} />
+          <ProgressBar current={index - FIRST_SLIDE} total={TOTAL_SLIDES} />
         </div>
         <div className="flex items-center gap-3 rounded-pill bg-white px-4 py-2 shadow-sm">
           <span className="max-w-[120px] truncate text-sm font-semibold text-navy">
@@ -130,7 +120,7 @@ export default function PlayPage() {
       <div className="flex flex-1 items-center justify-center">
         <AnimatePresence mode="wait">
           <motion.div
-            key={`${inLobby ? 'lobby' : ended ? 'end' : index}`}
+            key={index}
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -40 }}

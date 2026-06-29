@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase';
 import { GAME_CODE } from '@/lib/types';
-import { TOTAL_SLIDES, getSlide } from '@/lib/slides-data';
+import { FIRST_SLIDE, LAST_SLIDE, getSlide } from '@/lib/slides-data';
 
 // POST /api/host/advance
 //  Body: { target?: number, direction?: 'next' | 'prev' }
@@ -39,14 +39,14 @@ export async function POST(request: NextRequest) {
     nextIndex = session.current_slide_index + 1;
   }
 
-  nextIndex = Math.max(0, Math.min(TOTAL_SLIDES - 1, nextIndex));
+  nextIndex = Math.max(FIRST_SLIDE, Math.min(LAST_SLIDE, nextIndex));
 
-  // Derive status from the destination slide.
+  // Derive status from the destination slide type.
   const slide = getSlide(nextIndex);
   let status: string = 'active';
-  if (slide?.type === 'checkpoint') status = 'checkpoint';
-  else if (nextIndex >= TOTAL_SLIDES - 1) status = 'ended';
-  else if (nextIndex === 0) status = 'lobby';
+  if (slide?.type === 'lobby') status = 'lobby';
+  else if (slide?.type === 'checkpoint' || slide?.type === 'wheel') status = 'checkpoint';
+  else if (slide?.type === 'end') status = 'ended';
 
   const { data: updated, error: updateError } = await supabase
     .from('game_sessions')
