@@ -87,9 +87,9 @@ export default function JoinPage() {
 
       <a
         href="/host"
-        className="mt-6 text-sm font-medium text-navy/50 underline-offset-2 hover:underline"
+        className="mt-8 flex items-center gap-1 text-xs font-medium text-navy/35 transition-colors hover:text-navy/60"
       >
-        I&apos;m the presenter →
+        🔒 Presenter access (password required)
       </a>
     </main>
   );

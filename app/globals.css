@@ -1,26 +1,86 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ── Internal Selection design system ──────────────────────────────
+   Brand tokens lifted from the BUS 481 slide deck. */
+@theme {
+  --color-bg: #f0ede8; /* linen / cream background */
+  --color-navy: #2d3250; /* primary text, headings */
+  --color-teal: #5b8fa8; /* accent, buttons, correct state */
+  --color-sage: #8aad8b; /* secondary accent, success hints */
+  --color-tan: #b8a98a; /* warm highlight, decorative blobs */
+  --color-error: #c0392b; /* wrong answer state */
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Fira Code", monospace;
+
+  --radius-card: 16px;
+  --radius-btn: 12px;
+  --radius-pill: 24px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Always linen + navy — this app does not have a dark mode, so we pin
+   the colors regardless of the OS prefers-color-scheme setting. */
+html,
+body {
+  background-color: #f0ede8;
+  color: #2d3250;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ── Animations ───────────────────────────────────────────────── */
+@keyframes sad-cat-bounce {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  25% {
+    transform: translateY(-14px) rotate(3deg);
+  }
+  50% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  75% {
+    transform: translateY(-7px) rotate(2deg);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes float-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(8px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+.animate-sad-cat {
+  animation: sad-cat-bounce 0.9s ease-in-out infinite;
+}
+.animate-float-bob {
+  animation: float-bob 3s ease-in-out infinite;
+}
+.animate-wiggle {
+  animation: wiggle 0.4s ease-in-out;
 }
