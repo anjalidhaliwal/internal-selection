@@ -82,6 +82,23 @@ export function HostDashboard({ sessionId }: { sessionId: string }) {
     URL.revokeObjectURL(url);
   }
 
+  async function handleReset() {
+    if (!password) return;
+    const ok = window.confirm(
+      'Reset the game?\n\nThis permanently deletes ALL players and scores and returns to the lobby. Export the CSV first if you want to keep them.\n\nContinue?'
+    );
+    if (!ok) return;
+    const res = await fetch('/api/host/reset', {
+      method: 'POST',
+      headers: { 'x-host-password': password },
+    });
+    if (!res.ok) {
+      alert('Reset failed');
+      return;
+    }
+    alert('Game reset — everyone has been cleared and the game is back at the lobby.');
+  }
+
   const index = session?.current_slide_index ?? FIRST_SLIDE;
   const slide = getSlide(index);
   const nextSlide = getSlide(index + 1);
@@ -96,12 +113,20 @@ export function HostDashboard({ sessionId }: { sessionId: string }) {
           </p>
           <h1 className="text-2xl font-extrabold text-navy">Control Panel</h1>
         </div>
-        <button
-          onClick={handleExport}
-          className="flex items-center gap-2 rounded-btn bg-sage px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-sage/90"
-        >
-          📥 Export Scores CSV
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExport}
+            className="flex items-center gap-2 rounded-btn bg-sage px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-sage/90"
+          >
+            📥 Export Scores CSV
+          </button>
+          <button
+            onClick={handleReset}
+            className="flex items-center gap-2 rounded-btn border-2 border-error/40 px-4 py-2 text-sm font-semibold text-error transition-colors hover:bg-error/10"
+          >
+            🔄 Reset Game
+          </button>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px]">
