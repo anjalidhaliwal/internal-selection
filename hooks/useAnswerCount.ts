@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getSupabaseBrowser } from '@/lib/supabase';
+
+let channelSeq = 0;
 
 // Host-side: live count of answers submitted for a given slide.
 export function useAnswerCount(slideIndex: number | null | undefined) {
   const [count, setCount] = useState(0);
+  const cid = useRef<number>(++channelSeq);
 
   useEffect(() => {
     if (slideIndex === null || slideIndex === undefined) {
@@ -25,7 +28,7 @@ export function useAnswerCount(slideIndex: number | null | undefined) {
     load();
 
     const channel = supabase
-      .channel(`answers-${slideIndex}`)
+      .channel(`answers-${slideIndex}-${cid.current}`)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'answers', filter: `slide_index=eq.${slideIndex}` },
