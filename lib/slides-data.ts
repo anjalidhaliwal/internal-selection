@@ -399,8 +399,8 @@ const RAW: RawSlide[] = [
     question_data: {
       question: 'Internal and external candidates are tied, no policy exists, everyone disagrees, both candidates withdraw. The problem is:',
       options: ['Budget', 'Coordination', 'Lead Time', 'Time Sequence'],
-      correct_index: 1,
-      explanation: 'No pre-agreed policy to coordinate the decision — coordination again.',
+      correct_index: 3,
+      explanation: 'The internal and external searches were run at the same time with no agreed order — a time-sequence problem.',
     },
   },
   reveal(), // deck 44
@@ -684,7 +684,8 @@ const RAW: RawSlide[] = [
       question: "You're filling a leadership role. Which method first?",
       options: ['Job Posting', 'Nominations', 'Talent Management System', 'Succession Plan'],
       correct_index: 2,
-      explanation: 'A TMS proactively identifies ready candidates — most strategic for leadership.',
+      correct_indices: [2, 3],
+      explanation: 'Both a Talent Management System and a Succession Plan proactively identify ready leaders — either is a strong first move.',
     },
   },
   reveal(), // deck 73
@@ -745,7 +746,6 @@ const RAW: RawSlide[] = [
       correct_index: 1,
     },
   },
-  t('title', '🎮 GAME TIME!'), // deck 81
   t('break', '☕ 5-Minute Break'), // deck 82
 
   // ── 6.6 LEGAL ISSUES ───────────────────────────────

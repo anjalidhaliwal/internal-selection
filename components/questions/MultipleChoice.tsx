@@ -26,8 +26,9 @@ export function MultipleChoice({ data, locked, result, onSubmit }: MultipleChoic
   }
 
   const revealed = result != null;
-  const correctIndex =
-    result?.correct_index ?? (revealed ? data.correct_index : null);
+  const correctSet = revealed
+    ? new Set<number>(data.correct_indices ?? [data.correct_index])
+    : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -37,8 +38,8 @@ export function MultipleChoice({ data, locked, result, onSubmit }: MultipleChoic
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {data.options.map((option, i) => {
           const isSelected = selected === i;
-          const isCorrect = revealed && correctIndex === i;
-          const isWrongPick = revealed && isSelected && correctIndex !== i;
+          const isCorrect = revealed && !!correctSet?.has(i);
+          const isWrongPick = revealed && isSelected && !correctSet?.has(i);
 
           let style =
             'border-navy/10 bg-white hover:border-teal/50 hover:bg-teal/5';

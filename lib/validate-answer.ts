@@ -49,7 +49,11 @@ export function isAnswerCorrect(
   switch (slide.question_type) {
     case 'multiple_choice': {
       const data = slide.question_data as MultipleChoiceData;
-      return answerData.selected_index === data.correct_index;
+      const selected = answerData.selected_index;
+      if (Array.isArray(data.correct_indices) && data.correct_indices.length) {
+        return data.correct_indices.includes(selected as number);
+      }
+      return selected === data.correct_index;
     }
 
     case 'fill_blank': {

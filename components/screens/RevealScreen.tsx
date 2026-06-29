@@ -19,7 +19,8 @@ export function RevealScreen({ slideIndex }: RevealScreenProps) {
   let answer: string | null = null;
   if (q?.question_type === 'multiple_choice') {
     const d = q.question_data as MultipleChoiceData;
-    answer = d.options[d.correct_index];
+    const idxs = d.correct_indices ?? [d.correct_index];
+    answer = idxs.map((i) => d.options[i]).join(' & ');
   } else if (q?.question_type === 'fill_blank') {
     const d = q.question_data as FillBlankData;
     answer = d.blanks.join(' · ');

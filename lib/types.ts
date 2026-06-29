@@ -23,6 +23,7 @@ export interface MultipleChoiceData {
   question: string;
   options: string[];
   correct_index: number;
+  correct_indices?: number[]; // if set, ANY of these counts as correct
   explanation?: string;
 }
 
